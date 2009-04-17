@@ -1,0 +1,1 @@
+<?php # func goes here ?>
