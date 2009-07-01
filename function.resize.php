@@ -58,7 +58,7 @@ function resize($imagePath,$opts=null){
 	$filename = md5_file($imagePath);
 
 	if(!empty($w) and !empty($h)){
-		$newPath = $cacheFolder.$filename.'_w'.$w.'_h'.$h.(isset($opts['crop']) && $opts['crop'] == true ? "_cp" : "")..(isset($opts['scale']) && $opts['scale'] == true ? "_sc" : "").'.'.$ext;
+		$newPath = $cacheFolder.$filename.'_w'.$w.'_h'.$h.(isset($opts['crop']) && $opts['crop'] == true ? "_cp" : "").(isset($opts['scale']) && $opts['scale'] == true ? "_sc" : "").'.'.$ext;
 	}elseif(!empty($w)){
 		$newPath = $cacheFolder.$filename.'_w'.$w.'.'.$ext;	
 	}elseif(!empty($h)){
