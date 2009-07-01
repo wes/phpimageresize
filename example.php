@@ -26,7 +26,7 @@ include 'function.resize.php';
 	</div>
 
 	<div class='block'>
-		<img src='<?=resize('images/dog.jpg',array('w'=>300,'h'=>300,'crop'=>true,'scale'=>false))?>' border='0' />
+		<img src='<?=resize('images/dog.jpg',array('w'=>200,'h'=>200,'crop'=>true))?>' border='0' />
 	</div>
 
 	<div class='block'>
