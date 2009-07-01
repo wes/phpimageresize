@@ -47,7 +47,7 @@ include 'function.resize.php';
 	</div>
 
 	<div class='block'>
-		<?php $settings = array('w'=>300,'h'=>300,'canvas-color'=>'ff0000'); ?>
+		<?php $settings = array('w'=>300,'h'=>300,'canvas-color'=>'#ff0000'); ?>
 		<div><img src='<?=resize('images/dog.jpg',$settings)?>' border='0' /></div>
 		<p>Image resized by width and height and custom canvas color</p>
 		<div><pre><code>src: images/dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
