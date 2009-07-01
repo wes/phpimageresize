@@ -11,6 +11,7 @@ function resize($imagePath,$opts=null){
 	# start configuration
 	
 	$cacheFolder = './cache/'; # path to your cache folder, must be writeable by web server
+	$remoteFolder = $cacheFolder.'remote/'; # path to the folder you wish to download remote images into
 	$quality = 90; # image quality to use for ImageMagick (0 - 100)
 	
 	$cache_http_minutes = 20; 	# cache downloaded http images 20 minutes
@@ -24,7 +25,7 @@ function resize($imagePath,$opts=null){
 		# grab the image, and cache it so we have something to work with..
 		$finfo = pathinfo($imagePath);
 		list($filename) = explode('?',$finfo['basename']);
-		$local_filepath = $cacheFolder.'flickr/'.$filename;
+		$local_filepath = $remoteFolder.$filename;
 		$download_image = true;
 		if(file_exists($local_filepath)):
 			if(filemtime($local_filepath) < strtotime('+'.$cache_http_minutes.' minutes')):
