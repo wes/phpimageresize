@@ -51,6 +51,12 @@ include 'function.resize.php';
 		<div><pre><code><?php print_r($settings)?></code></pre></div>
 	</div>
 
+	<div class='block'>
+		<?php $settings = array('w'=>100,'h'=>100,'crop'=>true); ?>
+		<div><img src='<?=resize('http://farm4.static.flickr.com/3210/2934973285_fa4761c982.jpg',$settings)?>' border='0' /></div>
+		<div><pre><code><?php print_r($settings)?></code></pre></div>
+	</div>
+
 </div>
 
 </body>
