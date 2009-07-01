@@ -17,15 +17,18 @@ include 'function.resize.php';
 			font-family: lucida grande; 
 			text-align: center; 
 		}
+		h1 { font-size: 15px; text-align: center; }
 		#main { margin: auto; width: 400px; text-align: left; }
-		.block { margin: 20px; }
-		pre { text-align: left; width: 400px; background: #010101; padding: 10px; }
+		.block { margin: 20px; background: #cacaca; padding: 20px; text-align: center; }
+		pre { text-align: left; width: 300px; background: #010101; padding: 10px; font-size: 11px; }
 	</style>
 </head>
 
 <body>
 
 <div id='main'>
+
+	<h1>PHP Image Resizer</h1>
 
 	<div class='block'>
 		<?php $settings = array('w'=>300); ?>
