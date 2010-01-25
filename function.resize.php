@@ -110,7 +110,7 @@ function resize($imagePath,$opts=null){
 		}elseif(!empty($w)){
 			exec($path_to_convert." ".$imagePath." -thumbnail ".$w."".(isset($opts['maxOnly']) && $opts['maxOnly'] == true ? "\>" : "")." -quality ".$quality." ".$newPath);
 		}elseif(!empty($h)){
-			exec($path_to_convert."convert ".$imagePath." -thumbnail x".$h."".(isset($opts['maxOnly']) && $opts['maxOnly'] == true ? "\>" : "")." -quality ".$quality." ".$newPath);
+			exec($path_to_convert." ".$imagePath." -thumbnail x".$h."".(isset($opts['maxOnly']) && $opts['maxOnly'] == true ? "\>" : "")." -quality ".$quality." ".$newPath);
 		}
 	}
 	
