@@ -100,7 +100,7 @@ function resize($imagePath,$opts=null){
 					$resize = $w;
 				}
 			}
-
+			$imagePath = "'".$imagePath."'";
 			if(isset($opts['scale']) && $opts['scale'] == true){
 				exec($path_to_convert." ".$imagePath."  -resize ".$resize." -quality ".$quality." ".$newPath);				
 			}else{
