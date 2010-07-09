@@ -20,10 +20,13 @@ function resize($imagePath,$opts=null){
 	
 	## you shouldn't need to configure anything else beyond this point
 
+	$purl = parse_url($imagePath);
+	$finfo = pathinfo($imagePath);
+	$ext = $finfo['extension'];
+
 	# check for remote image..
-	if(ereg('http://',$imagePath) == true):
+	if(isset($purl['scheme']) && $purl['scheme'] == 'http'):
 		# grab the image, and cache it so we have something to work with..
-		$finfo = pathinfo($imagePath);
 		list($filename) = explode('?',$finfo['basename']);
 		$local_filepath = $remoteFolder.$filename;
 		$download_image = true;
@@ -39,81 +42,71 @@ function resize($imagePath,$opts=null){
 		$imagePath = $local_filepath;
 	endif;
 
-	if(file_exists($imagePath) == false){
+	if(file_exists($imagePath) == false):
 		$imagePath = $_SERVER['DOCUMENT_ROOT'].$imagePath;
-		if(file_exists($imagePath) == false){
+		if(file_exists($imagePath) == false):
 			return 'image not found';
-		}
-	}
+		endif;
+	endif;
 
-	if(isset($opts['w'])){ $w = $opts['w']; }
-	if(isset($opts['h'])){ $h = $opts['h']; }
-
-	$fileParts = explode('.',$imagePath);
-	$count = count($fileParts) - 1;
-	$ext = $fileParts[$count];
-
-	$imgPath = str_replace('.'.$ext,'',$imagePath);
+	if(isset($opts['w'])): $w = $opts['w']; endif;
+	if(isset($opts['h'])): $h = $opts['h']; endif;
 
 	$filename = md5_file($imagePath);
 
-	if(!empty($w) and !empty($h)){
+	if(!empty($w) and !empty($h)):
 		$newPath = $cacheFolder.$filename.'_w'.$w.'_h'.$h.(isset($opts['crop']) && $opts['crop'] == true ? "_cp" : "").(isset($opts['scale']) && $opts['scale'] == true ? "_sc" : "").'.'.$ext;
-	}elseif(!empty($w)){
+	elseif(!empty($w)):
 		$newPath = $cacheFolder.$filename.'_w'.$w.'.'.$ext;	
-	}elseif(!empty($h)){
+	elseif(!empty($h)):
 		$newPath = $cacheFolder.$filename.'_h'.$h.'.'.$ext;
-	}else{
+	else:
 		return false;
-	}
+	endif;
 
 	$create = true;
 
-	if(file_exists($newPath) == true){
-
+	if(file_exists($newPath) == true):
 		$create = false;
-
 		$origFileTime = date("YmdHis",filemtime($imagePath));
 		$newFileTime = date("YmdHis",filemtime($newPath));
-
-		if($newFileTime < $origFileTime){
+		if($newFileTime < $origFileTime):
 			$create = true;
-		}
+		endif;
+	endif;
 
-	}
-
-	if($create == true){
-		if(!empty($w) and !empty($h)){
+	if($create == true):
+		if(!empty($w) and !empty($h)):
 
 			list($width,$height) = getimagesize($imagePath);
-		
 			$resize = $w;
 		
-			if($width > $height){
+			if($width > $height):
 				$resize = $w;
-				if(isset($opts['crop']) && $opts['crop'] == true){
+				if(isset($opts['crop']) && $opts['crop'] == true):
 					$resize = "x".$h;				
-				}
-			}else{
+				endif;
+			else:
 				$resize = "x".$h;
-				if(isset($opts['crop']) && $opts['crop'] == true){
+				if(isset($opts['crop']) && $opts['crop'] == true):
 					$resize = $w;
-				}
-			}
-			$imagePath = "'".$imagePath."'";
-			if(isset($opts['scale']) && $opts['scale'] == true){
-				exec($path_to_convert." ".$imagePath."  -resize ".$resize." -quality ".$quality." ".$newPath);				
-			}else{
-				exec($path_to_convert." ".$imagePath."  -resize ".$resize." -size ".$w."x".$h." xc:".(isset($opts['canvas-color'])?$opts['canvas-color']:"transparent")." +swap -gravity center -composite -quality ".$quality." ".$newPath);
-			}
+				endif;
+			endif;
+
+			if(isset($opts['scale']) && $opts['scale'] == true):
+				$cmd = $path_to_convert." ".$imagePath." -resize ".$resize." -quality ".$quality." ".$newPath;
+			else:
+				$cmd = $path_to_convert." ".$imagePath." -resize ".$resize." -size ".$w."x".$h." xc:".(isset($opts['canvas-color'])?$opts['canvas-color']:"transparent")." +swap -gravity center -composite -quality ".$quality." ".$newPath;
+			endif;
 						
-		}elseif(!empty($w)){
-			exec($path_to_convert." ".$imagePath." -thumbnail ".$w."".(isset($opts['maxOnly']) && $opts['maxOnly'] == true ? "\>" : "")." -quality ".$quality." ".$newPath);
-		}elseif(!empty($h)){
-			exec($path_to_convert." ".$imagePath." -thumbnail x".$h."".(isset($opts['maxOnly']) && $opts['maxOnly'] == true ? "\>" : "")." -quality ".$quality." ".$newPath);
-		}
-	}
-	
+		else:
+			$cmd = $path_to_convert." ".$imagePath." -thumbnail ".(!empty($h) ? 'x':'').$w."".(isset($opts['maxOnly']) && $opts['maxOnly'] == true ? "\>" : "")." -quality ".$quality." ".$newPath;
+		endif;
+
+		$c = exec($cmd);
+		
+	endif;
+
 	# return cache file path
 	return str_replace($_SERVER['DOCUMENT_ROOT'],'',$newPath);
 	
