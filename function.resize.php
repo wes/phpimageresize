@@ -1,5 +1,4 @@
 <?php
-
 /**
  * function by Wes Edling .. http://joedesigns.com
  * feel free to use this in any project, i just ask for a credit in the source code.
@@ -127,8 +126,10 @@ function resize($imagePath,$opts=null){
 			" -quality ". escapeshellarg($quality) ." ". escapeshellarg($newPath);
 		endif;
 
-		$c = exec($cmd);
-		
+		$c = exec($cmd, $output, $return_code);
+        if($return_code != 0) {
+			error_log("Tried to execute : $cmd, return code: $return_code, output: " . print_r($output, true));
+		}
 	endif;
 
 	# return cache file path
