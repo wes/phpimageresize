@@ -32,6 +32,15 @@ include 'function.resize.php';
 
 	<h1>PHP Image Resizer</h1>
 
+<?php
+$dirs = array('cache', 'cache/remote');
+foreach($dirs as $dir) {
+    $end_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR . $dir;
+    if(!is_dir($end_dir)) {
+        echo "<p><em>Hint: If this page looks broken, you probably need to 'mkdir -m 777 -p $end_dir</em></p>";
+    }
+}
+?>
 	<div class='block'>
 		<?php $settings = array('w'=>300); ?>
 		<div><img src='<?=resize('images/dog.jpg',$settings)?>' border='0' /></div>
