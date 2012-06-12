@@ -26,8 +26,8 @@
 function resize($imagePath,$opts=null){
 
 	# start configuration
-	$cacheFolder = './cache/'; # path to your cache folder, must be writeable by web server
-	$remoteFolder = $cacheFolder.'remote/'; # path to the folder you wish to download remote images into
+	$cacheFolder = 'cache/'; # path to your cache folder, must be writeable by web server
+	$remoteFolder = $cacheFolder.'r/'; # path to the folder you wish to download remote images into
 
 	$defaults = array('crop' => false, 'scale' => 'false', 'thumbnail' => false, 'maxOnly' => false, 
 	   'canvas-color' => 'transparent', 'output-filename' => false, 
@@ -39,7 +39,7 @@ function resize($imagePath,$opts=null){
 	$remoteFolder = $opts['remoteFolder'];
 
 	$path_to_convert = 'convert'; # this could be something like /usr/bin/convert or /opt/local/share/bin/convert
-	
+
 	## you shouldn't need to configure anything else beyond this point
 
 	$purl = parse_url($imagePath);
@@ -50,7 +50,8 @@ function resize($imagePath,$opts=null){
 	if(isset($purl['scheme']) && $purl['scheme'] == 'http'):
 		# grab the image, and cache it so we have something to work with..
 		list($filename) = explode('?',$finfo['basename']);
-		$local_filepath = $remoteFolder.$filename;
+		//$local_filepath = $remoteFolder.$filename;
+		$local_filepath = $remoteFolder.$opts['new-filename']. '.jpg';
 		$download_image = true;
 		if(file_exists($local_filepath)):
 			if(filemtime($local_filepath) < strtotime('+'.$opts['cache_http_minutes'].' minutes')):
@@ -67,14 +68,16 @@ function resize($imagePath,$opts=null){
 	if(file_exists($imagePath) == false):
 		$imagePath = $_SERVER['DOCUMENT_ROOT'].$imagePath;
 		if(file_exists($imagePath) == false):
-			return 'image not found';
+			//return 'image not found';
+			return '';
 		endif;
 	endif;
 
 	if(isset($opts['w'])): $w = $opts['w']; endif;
 	if(isset($opts['h'])): $h = $opts['h']; endif;
 
-	$filename = md5_file($imagePath);
+	//$filename = md5_file($imagePath);
+	$filename = $opts['new-filename'] . md5_file($imagePath). '.jpg';
 
 	// If the user has requested an explicit output-filename, do not use the cache directory.
 	if(false !== $opts['output-filename']) :
@@ -107,7 +110,7 @@ function resize($imagePath,$opts=null){
 
 			list($width,$height) = getimagesize($imagePath);
 			$resize = $w;
-		
+
 			if($width > $height):
 				$resize = $w;
 				if(true === $opts['crop']):
@@ -129,7 +132,7 @@ function resize($imagePath,$opts=null){
 				" xc:". escapeshellarg($opts['canvas-color']) .
 				" +swap -gravity center -composite -quality ". escapeshellarg($opts['quality'])." ".escapeshellarg($newPath);
 			endif;
-						
+
 		else:
 			$cmd = $path_to_convert." " . escapeshellarg($imagePath) . 
 			" -thumbnail ". (!empty($h) ? 'x':'') . $w ."". 
@@ -146,5 +149,5 @@ function resize($imagePath,$opts=null){
 
 	# return cache file path
 	return str_replace($_SERVER['DOCUMENT_ROOT'],'',$newPath);
-	
+
 }
