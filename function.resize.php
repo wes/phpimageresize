@@ -37,12 +37,15 @@ function resize($imagePath,$opts=null){
 					'cacheFolder'			=> $cacheFolder,
 					'remoteFolder'			=> $remoteFolder,
 					'quality'				=> 90,
-					'cache_http_minutes'	=> 0
+					'cache_http_minutes'	=> 60
 				);
 	$opts = array_merge($defaults, $opts);
 	$path_to_convert = 'convert';						//this could be something like /usr/bin/convert or /opt/local/share/bin/convert
 	// configuration ends...
 	
+	//processing begins
+	$cacheFolder = $opts['cacheFolder'];
+	$remoteFolder = $opts['remoteFolder'];
 	$purl = parse_url($imagePath);
 	$finfo = pathinfo($imagePath);
 	$ext = $finfo['extension'];
