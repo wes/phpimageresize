@@ -7,6 +7,7 @@
  *
  * Changes: 
  * 2012/01/30 - David Goodwin - call escapeshellarg on parameters going into the shell
+ * 2012/07/12 - Whizzkid - Added support for encoded image urls and images on ssl secured servers [https://]
  */
 
 /**
@@ -24,7 +25,7 @@
  * @return new URL for resized image.
  */
 function resize($imagePath,$opts=null){
-
+	$imagePath = urldecode($imagePath);
 	# start configuration
 	$cacheFolder = './cache/'; # path to your cache folder, must be writeable by web server
 	$remoteFolder = $cacheFolder.'remote/'; # path to the folder you wish to download remote images into
@@ -47,7 +48,7 @@ function resize($imagePath,$opts=null){
 	$ext = $finfo['extension'];
 
 	# check for remote image..
-	if(isset($purl['scheme']) && $purl['scheme'] == 'http'):
+	if(isset($purl['scheme']) && ($purl['scheme'] == 'http' || $purl['scheme'] == 'https')):
 		# grab the image, and cache it so we have something to work with..
 		list($filename) = explode('?',$finfo['basename']);
 		$local_filepath = $remoteFolder.$filename;
