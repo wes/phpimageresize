@@ -1,13 +1,18 @@
 <?php
 # include the function here
-include 'function.resize.php';
+require_once 'function.resize.php';
 
+if(!empty($_GET)){
+	$image_path = $_GET['img'];
+}else{
+	$image_path = 'images/dog.png';
+}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
+	<META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
 	<title>PHP Image Resize - Example</title>
 	<style>
@@ -43,37 +48,37 @@ foreach($dirs as $dir) {
 ?>
 	<div class='block'>
 		<?php $settings = array('w'=>300); ?>
-		<div><img src='<?=resize('images/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='<?=resize($image_path,$settings)?>' border='0' /></div>
 		<p>Image resized by width only</p>
-		<div><pre><code>src: images/dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
+		<div><pre><code>src: <?=$image_path?><?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
 		<?php $settings = array('w'=>300,'h'=>300); ?>
-		<div><img src='<?=resize('images/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='<?=resize($image_path,$settings)?>' border='0' /></div>
 		<p>Image resized by width and height</p>
-		<div><pre><code>src: images/dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
+		<div><pre><code>src: <?=$image_path?><?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
 		<?php $settings = array('w'=>240,'h'=>240,'canvas-color'=>'#ff0000'); ?>
-		<div><img src='<?=resize('images/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='<?=resize($image_path,$settings)?>' border='0' /></div>
 		<p>Image resized by width and height and custom canvas color</p>
-		<div><pre><code>src: images/dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
+		<div><pre><code>src: <?=$image_path?><?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
 		<?php $settings = array('w'=>300,'h'=>300,'crop'=>true); ?>
-		<div><img src='<?=resize('images/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='<?=resize($image_path,$settings)?>' border='0' /></div>
 		<p>Image cropped &amp; resized by width and height</p>
-		<div><pre><code>src: images/dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
+		<div><pre><code>src: <?=$image_path?><?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
 		<?php $settings = array('w'=>300,'h'=>300,'scale'=>true); ?>
-		<div><img src='<?=resize('images/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='<?=resize($image_path,$settings)?>' border='0' /></div>
 		<p>Image scaled by width and height</p>
-		<div><pre><code>src: images/dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
+		<div><pre><code>src: <?=$image_path?><?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
@@ -81,6 +86,20 @@ foreach($dirs as $dir) {
 		<div><img src='<?=resize('http://farm4.static.flickr.com/3210/2934973285_fa4761c982.jpg',$settings)?>' border='0' /></div>
 		<p>Image cropped &amp; resized by width and height from a remote location.</p>
 		<div><pre><code>src: http://farm4.static.flickr.com/3210/2934973285_fa4761c982.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
+	</div>
+
+	<div class='block'>
+		<?php $settings = array('w'=>300,'compress'=>true); ?>
+		<div><img src='<?=resize($image_path,$settings)?>' border='0' /></div>
+		<p>Compressing Image To JPEG</p>
+		<div><pre><code>src: <?=$image_path?><?php echo "\n\n"; print_r($settings)?></code></pre></div>
+	</div>
+
+	<div class='block'>
+		<?php $settings = array('w'=>300,'compress'=>300,'compression'=>70); ?>
+		<div><img src='<?=resize($image_path,$settings)?>' border='0' /></div>
+		<p>Compressing to higher value (Will Affect Quality!)</p>
+		<div><pre><code>src: <?=$image_path?><?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 </div>

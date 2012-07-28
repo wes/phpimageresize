@@ -6,8 +6,9 @@
  *
  * Changes: 
  * 2012/01/30 - David Goodwin - call escapeshellarg on parameters going into the shell
- * 2012/07/12 - Whizzkid - Added support for encoded image urls and images on ssl secured servers [https://]
- * 2012/07/12 - Whizzkid - Code Cleaning...
+ * 2012/07/12 - Whizzzkid - Added support for encoded image urls and images on ssl secured servers [https://]
+ * 2012/07/12 - Whizzzkid - Code Cleaning...
+ * 2012/07/28 - Whizzzkid - Added Compression Support upto 97% file size reduction achieved. Lots of code cleaned!
  */
 /**
  * SECURITY:
@@ -24,21 +25,25 @@
  */
 function resize($imagePath,$opts=null){
 	$imagePath = urldecode($imagePath);
+	
 	// start configuration........
-	$cacheFolder = './cache/';							//path to your cache folder, must be writeable by web server
+	$cacheFolder = 'cache/';							//path to your cache folder, must be writeable by web server
 	$remoteFolder = $cacheFolder.'remote/';				//path to the folder you wish to download remote images into
-	$defaults = array(
-					'crop'					=> false,
-					'scale'					=> false,
-					'thumbnail'				=> false,
-					'maxOnly'				=> false,
-					'canvas-color'			=> 'transparent',
-					'output-filename'		=> false,
-					'cacheFolder'			=> $cacheFolder,
-					'remoteFolder'			=> $remoteFolder,
-					'quality'				=> 90,
-					'cache_http_minutes'	=> 60
-				);
+	
+	//setting script defaults
+	$defaults['crop']				= false;
+	$defaults['scale']				= false;
+	$defaults['thumbnail']			= false;
+	$defaults['maxOnly']			= false;
+	$defaults['canvas-color']		= 'transparent';
+	$defaults['output-filename']	= false;
+	$defaults['cacheFolder']		= $cacheFolder;
+	$defaults['remoteFolder']		= $remoteFolder;
+	$defaults['quality'] 			= 80;
+	$defaults['cache_http_minutes']	= 1;
+	$defaults['compress']			= false;			//will convert to lossy jpeg for conversion...
+	$defaults['compression']		= 40;				//[1-99]higher the value, better the compression, more the time, lower the quality (lossy)
+	
 	$opts = array_merge($defaults, $opts);
 	$path_to_convert = 'convert';						//this could be something like /usr/bin/convert or /opt/local/share/bin/convert
 	// configuration ends...
@@ -60,14 +65,14 @@ function resize($imagePath,$opts=null){
 				$download_image = false;
 			}
 		}
-		if($download_image == true){
+		if($download_image){
 			file_put_contents($local_filepath,file_get_contents($imagePath));
 		}
 		$imagePath = $local_filepath;
 	}
-	if(file_exists($imagePath) == false){
+	if(!file_exists($imagePath)){
 		$imagePath = $_SERVER['DOCUMENT_ROOT'].$imagePath;
-		if(file_exists($imagePath) == false){
+		if(!file_exists($imagePath)){
 			return 'image not found';
 		}
 	}
@@ -75,21 +80,30 @@ function resize($imagePath,$opts=null){
 	if(isset($opts['h'])){ $h = $opts['h']; };
 	$filename = md5_file($imagePath);
 	// If the user has requested an explicit output-filename, do not use the cache directory.
-	if($opts['output-filename'] !== false){
+	if($opts['output-filename']){
 		$newPath = $opts['output-filename'];
 	}else{
         if(!empty($w) and !empty($h)){
-            $newPath = $cacheFolder.$filename.'_w'.$w.'_h'.$h.($opts['crop'] == true ? "_cp" : "").($opts['scale'] == true ? "_sc" : "").'.'.$ext;
+            $newPath = $cacheFolder.$filename.'_w'.$w.'_h'.$h.($opts['crop'] == true ? "_cp" : "").($opts['scale'] == true ? "_sc" : "");
         }else if(!empty($w)){
-            $newPath = $cacheFolder.$filename.'_w'.$w.'.'.$ext;	
+            $newPath = $cacheFolder.$filename.'_w'.$w;	
         }else if(!empty($h)){
-            $newPath = $cacheFolder.$filename.'_h'.$h.'.'.$ext;
+            $newPath = $cacheFolder.$filename.'_h'.$h;
         }else{
             return false;
         }
+		if($opts['compress']){
+			if($opts['compression'] == $defaults['compression']){
+				$newPath .= '_comp.'.$ext;
+			}else{
+				$newPath .= '_comp_'.$opts['compression'].'.'.$ext;
+			}
+		}else{
+			$newPath .= '.'.$ext;
+		}
 	}
 	$create = true;
-    if(file_exists($newPath) == true){
+    if(file_exists($newPath)){
         $create = false;
         $origFileTime = date("YmdHis",filemtime($imagePath));
         $newFileTime = date("YmdHis",filemtime($newPath));
@@ -97,43 +111,71 @@ function resize($imagePath,$opts=null){
             $create = true;
         }
     }
-	if($create == true){
-		if(!empty($w) and !empty($h)){
+	if($create){
+		if(!empty($w) && !empty($h)){
 			list($width,$height) = getimagesize($imagePath);
 			$resize = $w;
 			if($width > $height){
+				$ww = $w;
+				$hh = round(($height/$width) * $ww);
 				$resize = $w;
-				if($opts['crop'] == true){
+				if($opts['crop']){
 					$resize = "x".$h;				
 				}
 			}else{
+				$hh = $h;
+				$ww = round(($width/$height) * $hh);
 				$resize = "x".$h;
-				if($opts['crop'] == true){
+				if($opts['crop']){
 					$resize = $w;
 				}
 			}
-			if($opts['scale'] == true){
-				$cmd = $path_to_convert ." ". escapeshellarg($imagePath) ." -resize ". escapeshellarg($resize) . 
-				" -quality ". escapeshellarg($opts['quality']) . " " . escapeshellarg($newPath);
+			if($opts['scale']){
+				$cmd = $path_to_convert." ".escapeshellarg($imagePath)." -resize ".escapeshellarg($resize)." -quality ". escapeshellarg($opts['quality'])." " .escapeshellarg($newPath);
+			}else if($opts['canvas-color'] == 'transparent' && !$opts['crop'] && !$opts['scale']){
+				$cmd = $path_to_convert." ".escapeshellarg($imagePath)." -resize ".escapeshellarg($resize)." -size ".escapeshellarg($ww ."x". $hh)." xc:". escapeshellarg($opts['canvas-color'])." +swap -gravity center -composite -quality ".escapeshellarg($opts['quality'])." ".escapeshellarg($newPath);
 			}else{
-				$cmd = $path_to_convert." ". escapeshellarg($imagePath) ." -resize ". escapeshellarg($resize) . 
-				" -size ". escapeshellarg($w ."x". $h) . 
-				" xc:". escapeshellarg($opts['canvas-color']) .
-				" +swap -gravity center -composite -quality ". escapeshellarg($opts['quality'])." ".escapeshellarg($newPath);
+				$cmd = $path_to_convert." ".escapeshellarg($imagePath)." -resize ".escapeshellarg($resize)." -size ".escapeshellarg($w ."x". $h)." xc:". escapeshellarg($opts['canvas-color'])." +swap -gravity center -composite -quality ".escapeshellarg($opts['quality'])." ".escapeshellarg($newPath);
 			}
 		}else{
-			$cmd = $path_to_convert." " . escapeshellarg($imagePath) . 
-			" -thumbnail ". (!empty($h) ? 'x':'') . $w ."". 
-			($opts['maxOnly'] == true ? "\>" : "") . 
-			" -quality ". escapeshellarg($opts['quality']) ." ". escapeshellarg($newPath);
+			$cmd = $path_to_convert." " . escapeshellarg($imagePath).
+			" -thumbnail ".(!empty($h) ? 'x':'').$w." ".($opts['maxOnly'] == true ? "\>" : "")." -quality ".escapeshellarg($opts['quality'])." ".escapeshellarg($newPath);
 		}
 		$c = exec($cmd, $output, $return_code);
         if($return_code != 0) {
             error_log("Tried to execute : $cmd, return code: $return_code, output: " . print_r($output, true));
             return false;
 		}
+		if($opts['compress']){
+			$size = getimagesize($newPath);
+			$mime = $size['mime'];
+			if($mime == 'image/png' || $mime == 3){
+				$picture = imagecreatefrompng($newPath);
+			}else if($mime == 'image/jpeg' || $mime == 2){
+				$picture = imagecreatefromjpeg($newPath);
+			}else if($mime == 'image/gif' || $mime == 1){
+				$picture = imagecreatefromgif($newPath);
+			}else{			
+				error_log("I do not support this format for now. Mime - $mime ", 0);
+			}
+			if(isset($picture)){
+				$newP_arr = explode(".",$newPath);
+				$newestPath = $newP_arr[0].".jpg";
+				$qc = 100 - $opts['compression'];
+				$status = imagejpeg($picture,"$newestPath",$qc);
+				if($status){
+					unlink($newPath);
+					$newPath = $newestPath;
+				}else{
+					@unlink($newestPath);
+					error_log("I failed to compress the image in jpeg format.", 0);
+				}
+				imagedestroy($picture);
+			}else{
+				error_log("Failed To extract picture data", 0);
+			}
+		}
 	}
-
 	// return cache file path
 	return str_replace($_SERVER['DOCUMENT_ROOT'],'',$newPath);	
 }
