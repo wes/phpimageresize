@@ -9,7 +9,7 @@ include 'function.resize.php';
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 	<meta http-equiv="content-type" content="text/html;charset=UTF-8" />
-	<title>PHP Image Resize - Example</title>
+	<title>PHP Image Resize with S3 Support - Example</title>
 	<style>
 		body { 
 			background: #ffffff; 
@@ -30,50 +30,41 @@ include 'function.resize.php';
 
 <div id='main'>
 
-	<h1>PHP Image Resizer</h1>
+	<h1>PHP Image Resizer with S3 Support</h1>
 
-<?php
-$dirs = array('cache', 'cache/remote');
-foreach($dirs as $dir) {
-    $end_dir = dirname(__FILE__) . DIRECTORY_SEPARATOR . $dir;
-    if(!is_dir($end_dir)) {
-        echo "<p><em>Hint: If this page looks broken, you probably need to 'mkdir -m 777 -p $end_dir</em></p>";
-    }
-}
-?>
 	<div class='block'>
 		<?php $settings = array('w'=>300); ?>
-		<div><img src='<?=resize('images/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='<?=resize('/dog.jpg',$settings)?>' border='0' /></div>
 		<p>Image resized by width only</p>
-		<div><pre><code>src: images/dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
+		<div><pre><code>src: /dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
 		<?php $settings = array('w'=>300,'h'=>300); ?>
-		<div><img src='<?=resize('images/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='<?=resize('/dog.jpg',$settings)?>' border='0' /></div>
 		<p>Image resized by width and height</p>
-		<div><pre><code>src: images/dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
+		<div><pre><code>src: /dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
 		<?php $settings = array('w'=>240,'h'=>240,'canvas-color'=>'#ff0000'); ?>
-		<div><img src='<?=resize('images/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='<?=resize('/dog.jpg',$settings)?>' border='0' /></div>
 		<p>Image resized by width and height and custom canvas color</p>
-		<div><pre><code>src: images/dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
+		<div><pre><code>src: /dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
 		<?php $settings = array('w'=>300,'h'=>300,'crop'=>true); ?>
-		<div><img src='<?=resize('images/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='<?=resize('/dog.jpg',$settings)?>' border='0' /></div>
 		<p>Image cropped &amp; resized by width and height</p>
-		<div><pre><code>src: images/dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
+		<div><pre><code>src: /dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
 		<?php $settings = array('w'=>300,'h'=>300,'scale'=>true); ?>
-		<div><img src='<?=resize('images/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='<?=resize('/dog.jpg',$settings)?>' border='0' /></div>
 		<p>Image scaled by width and height</p>
-		<div><pre><code>src: images/dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
+		<div><pre><code>src: /dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
