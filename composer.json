@@ -1,0 +1,6 @@
+{
+ "require" : {
+ 	"h4cc/wkhtmltoimage-amd64": "dev-master",
+ 	"h4cc/wkhtmltopdf-amd64": "dev-master"
+ }
+}

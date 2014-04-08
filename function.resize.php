@@ -17,8 +17,26 @@ ini_set('error_reporting', E_ALL);
 
 // Simple alias function, if neeeded
 function resize($imagePath,$opts=array()){
+	
 	$r = new resizeClass();
+
+	$opts = (object) array();
+
+	if(!empty($_GET['imagePath']))
+		$opts->imagePath = $_GET['imagePath'];
+	if(!empty($_GET['width']))
+		$opts->width = $_GET['width'];
+	if(!empty($_GET['height']))
+		$opts->height = $_GET['height'];
+	if(!empty($_GET['crop']))
+		$opts->crop = $_GET['crop'];
+	if(!empty($_GET['scale']))
+		$opts->scale = $_GET['scale'];
+	if(!empty($_GET['canvas_color']))
+		$opts->scale = $_GET['canvas_color'];
+
 	return $r->run($imagePath, $opts);
+
 }
 
 // Resize Class
@@ -35,17 +53,19 @@ class resizeClass {
 
 	function run($imagePath,$opts=array()){
 
+		$opts = (array) $opts;
+
 		$imagePath = urldecode($imagePath);
 
 		# start configuration
 
 		$s3bucket = 'joedesigns'; # your s3 bucket where to store everything
 		$cacheFolder = 'cache'; # path to your cache folder, must be writeable by aws server
-		$pathToConvert = 'convert'; # this could be something like /usr/bin/convert or /opt/local/share/bin/convert
+		// $pathToConvert = 'convert'; # this could be something like /usr/bin/convert or /opt/local/share/bin/convert
 
 		$defaults = array(
 			'crop' => false, 
-			'scale' => 'false', 
+			'scale' => false,
 			'thumbnail' => false, 
 			'max_only' => false, 
 		   	'canvas_color' => 'transparent', 
@@ -55,108 +75,54 @@ class resizeClass {
 
 		# you shouldn't need to configure anything else beyond this point, unless your mad!
 
-		$opts = array_merge($defaults, $opts);    
+		$opts = (object) array_merge($defaults, $opts);    
 		$purl = parse_url($imagePath);
 		$finfo = pathinfo($imagePath);
 		$ext = $finfo['extension'];
 
 		$url = $this->get_url($s3bucket, $imagePath);
 
-		$img = file_get_contents($url);
+		$raw = file_get_contents($url);
 
-		$im = new Imagick();
-	    $im->readImageBlob($img);
-	    $im->setImageFormat("png24");
-	    header("Content-Type: image/png");
-	    $thumbnail = $im->getImageBlob();
-	    echo $thumbnail;
-
-		// $image = new Imagick($url);
-  //  $image->thumbnailImage(100, 100);
-  //  header( "Content-Type: image/jpg" );
-  //  echo $image;
-
-		// echo $img;
-
-
-	// if(file_exists($imagePath) == false):
-	// 	$imagePath = $_SERVER['DOCUMENT_ROOT'].$imagePath;
-	// 	if(file_exists($imagePath) == false):
-	// 		return 'image not found';
-	// 	endif;
-	// endif;
-
-	// if(isset($opts['w'])): $w = $opts['w']; endif;
-	// if(isset($opts['h'])): $h = $opts['h']; endif;
-
-	// $filename = md5_file($imagePath);
-
- //        if(!empty($w) and !empty($h)):
- //            $newPath = $cacheFolder.$filename.'_w'.$w.'_h'.$h.(isset($opts['crop']) && $opts['crop'] == true ? "_cp" : "").(isset($opts['scale']) && $opts['scale'] == true ? "_sc" : "").'.'.$ext;
- //        elseif(!empty($w)):
- //            $newPath = $cacheFolder.$filename.'_w'.$w.'.'.$ext;	
- //        elseif(!empty($h)):
- //            $newPath = $cacheFolder.$filename.'_h'.$h.'.'.$ext;
- //        else:
- //            return false;
- //        endif;
-
-	// $create = true;
-
- //    if(file_exists($newPath) == true):
- //        $create = false;
- //        $origFileTime = date("YmdHis",filemtime($imagePath));
- //        $newFileTime = date("YmdHis",filemtime($newPath));
- //        if($newFileTime < $origFileTime): # Not using $opts['expire-time'] ??
- //            $create = true;
- //        endif;
- //    endif;
-
-	// if($create == true):
-	// 	if(!empty($w) and !empty($h)):
-
-	// 		list($width,$height) = getimagesize($imagePath);
-	// 		$resize = $w;
+		$im  = imagecreatefromstring($raw);
 		
-	// 		if($width > $height):
-	// 			$resize = $w;
-	// 			if(true === $opts['crop']):
-	// 				$resize = "x".$h;				
-	// 			endif;
-	// 		else:
-	// 			$resize = "x".$h;
-	// 			if(true === $opts['crop']):
-	// 				$resize = $w;
-	// 			endif;
-	// 		endif;
+		$width = imagesx($im);
+		$height = imagesy($im);
 
-	// 		if(true === $opts['scale']):
-	// 			$cmd = $pathToConvert ." ". escapeshellarg($imagePath) ." -resize ". escapeshellarg($resize) . 
-	// 			" -quality ". escapeshellarg($opts['quality']) . " " . escapeshellarg($newPath);
-	// 		else:
-	// 			$cmd = $pathToConvert." ". escapeshellarg($imagePath) ." -resize ". escapeshellarg($resize) . 
-	// 			" -size ". escapeshellarg($w ."x". $h) . 
-	// 			" xc:". escapeshellarg($opts['canvas_color']) .
-	// 			" +swap -gravity center -composite -quality ". escapeshellarg($opts['quality'])." ".escapeshellarg($newPath);
-	// 		endif;
-						
-	// 	else:
-	// 		$cmd = $pathToConvert." " . escapeshellarg($imagePath) . 
-	// 		" -thumbnail ". (!empty($h) ? 'x':'') . $w ."". 
-	// 		(isset($opts['max_only']) && $opts['max_only'] == true ? "\>" : "") . 
-	// 		" -quality ". escapeshellarg($opts['quality']) ." ". escapeshellarg($newPath);
-	// 	endif;
+		if(empty($opts->width) && empty($opts->height)):
+			$opts->width = $width;
+			$opts->height = $height;
+		elseif(empty($opts->width)):
+			$opts->width = ($opts->height / $height) * $width;
+		elseif(empty($opts->height)):
+			$opts->height = ($opts->width / $width) * $height;
+		endif;
 
-	// 	$c = exec($cmd, $output, $return_code);
- //        if($return_code != 0) {
- //            error_log("Tried to execute : $cmd, return code: $return_code, output: " . print_r($output, true));
- //            return false;
-	// 	}
-	// endif;
+		$original_aspect = $width / $height;
+		$thumb_aspect = $opts->width / $opts->height;
 
-	// # return cache file path
-	// return str_replace($_SERVER['DOCUMENT_ROOT'],'',$newPath);
+		if($original_aspect >= $thumb_aspect):
+		   $new_height = $opts->height;
+		   $new_width = $width / ($height / $opts->height);
+		else:
+		   $new_width = $opts->width;
+		   $new_height = $height / ($width / $opts->width);
+		endif;
 
+		$thumb = imagecreatetruecolor( $opts->width, $opts->height );
+
+		imagecopyresampled($thumb,
+		                   $im,
+		                   0 - ($new_width - $opts->width) / 2, // Center the image horizontally
+		                   0 - ($new_height - $opts->height) / 2, // Center the image vertically
+		                   0, 0,
+		                   $new_width, $new_height,
+		                   $width, $height);
+
+		header('Content-Type: image/jpeg');
+		imagejpeg($thumb);
+		imagedestroy($thumb);
+		
 	}
 }
 

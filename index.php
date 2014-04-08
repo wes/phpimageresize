@@ -1,4 +1,8 @@
 <?php
+
+ini_set('display_errors', 1);
+ini_set('error_reporting', E_ALL);
+
 # include the function here
 include 'function.resize.php';
 
@@ -34,44 +38,37 @@ include 'function.resize.php';
 
 	<div class='block'>
 		<?php $settings = array('w'=>300); ?>
-		<div><img src='<?=resize('/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='/img.php?imagePath=dog.jpg&width=300' border='0' /></div>
 		<p>Image resized by width only</p>
 		<div><pre><code>src: /dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
 		<?php $settings = array('w'=>300,'h'=>300); ?>
-		<div><img src='<?=resize('/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='/img.php?imagePath=dog.jpg&width=300&height=300' border='0' /></div>
 		<p>Image resized by width and height</p>
 		<div><pre><code>src: /dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
 		<?php $settings = array('w'=>240,'h'=>240,'canvas-color'=>'#ff0000'); ?>
-		<div><img src='<?=resize('/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='/img.php?imagePath=dog.jpg&width=240&height=240&canvas_color=#ff0000' border='0' /></div>
 		<p>Image resized by width and height and custom canvas color</p>
 		<div><pre><code>src: /dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
 		<?php $settings = array('w'=>300,'h'=>300,'crop'=>true); ?>
-		<div><img src='<?=resize('/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='/img.php?imagePath=dog.jpg&width=300&height=300&crop=true' border='0' /></div>
 		<p>Image cropped &amp; resized by width and height</p>
 		<div><pre><code>src: /dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 	<div class='block'>
 		<?php $settings = array('w'=>300,'h'=>300,'scale'=>true); ?>
-		<div><img src='<?=resize('/dog.jpg',$settings)?>' border='0' /></div>
+		<div><img src='/img.php?imagePath=dog.jpg&width=300&height=300&scale=true' border='0' /></div>
 		<p>Image scaled by width and height</p>
 		<div><pre><code>src: /dog.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
-	</div>
-
-	<div class='block'>
-		<?php $settings = array('w'=>100,'h'=>100,'crop'=>true); ?>
-		<div><img src='<?=resize('http://farm4.static.flickr.com/3210/2934973285_fa4761c982.jpg',$settings)?>' border='0' /></div>
-		<p>Image cropped &amp; resized by width and height from a remote location.</p>
-		<div><pre><code>src: http://farm4.static.flickr.com/3210/2934973285_fa4761c982.jpg<?php echo "\n\n"; print_r($settings)?></code></pre></div>
 	</div>
 
 </div>
