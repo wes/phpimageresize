@@ -45,7 +45,7 @@ function resize($imagePath,$opts=null){
 
 	$purl = parse_url($imagePath);
 	$finfo = pathinfo($imagePath);
-	$ext = $finfo['extension'];
+	list($ext) = explode("?",$finfo['extension']);
 
 	# check for remote image..
 	if(isset($purl['scheme']) && ($purl['scheme'] == 'http' || $purl['scheme'] == 'https')):
